@@ -1,4 +1,4 @@
-<?php
+ <?php
  session_start();
  
  
@@ -83,23 +83,26 @@
  
   <div class=" table-responsive "  style="background-color:#009966;">
    
-   
+  <h4>  &nbsp;>>Kırmızı Şeritte olan değerlerde <b><i>PATLAMA</i></b> riski vardır. Lütfen: 0555 555 55 55 No'lu telefona bildiriniz!</h4>
  <table id="datatable" class="table table-dark table-bordered" style="width:100%; table-layout: fixed; overflow-wrap: break-word; margin-left:auto;
       margin-right:auto; ">
                 <thead>
                     <tr>
                        
-                        <th>USER ID</th>
-                        <th>METAN</th>
-                        <th>PROPAN</th>
-                        <th>BUTAN</th>
-                        <th>CO</th>
-                        <th>TEMİZ HAVA</th>
+                        <th>ŞİRKET - İSİM (ID)</th>
+                        <th>METAN<br>(Max. 290ppm)</th>
+                        <th>PROPAN<br>(Max. 1000ppm)</th>
+                        <th>BUTAN<br>(Max. 1000ppm)</th>
+                        <th>CO<br>(Max. 400ppm)</th>
+                        <th>TEMİZ HAVA<br>(Max. 1000ppm)</th>
                         <th>TARİH</th>
                         
                     </tr>
                 </thead>
                 <tbody>
+                
+ 
+                
                 <?php
 		$cURLConnection = curl_init();
 		curl_setopt($cURLConnection, CURLOPT_URL, "https://madencigozlugu.com.tr/api/degerlerServis.php?token=emre");
@@ -110,9 +113,61 @@
   		
 		$data = $decoded_json['Degerler']; //  bu 'Degerler', apideki koleksiyonun adı.Örnek: {"Degerler":[{"uid":"1","uisim":"Emre }]}
 
+		 
+
 		foreach($data as $emre) 
 		{
-			echo '<tr><td>'. $emre['userid'] . '</td><td>'. $emre['metan'] . '</td><td>'. $emre['propan'] . '</td><td>'. $emre['butan'] . '</td><td>'. 			$emre['co'] . '</td><td>'. $emre['temizHava'] . '</td><td>'. $emre['tarih'] . '</td></tr>';
+		
+		   if($emre['metan'] > 290 || $emre['propan'] > 1000 || $emre['butan'] > 1000 || $emre['co'] >400 || $emre['temizHava'] > 1000){ 
+		  $renk= " style=background-color:#FF0000" ; 
+		   }
+		   else  { 
+		  $renk= "  " ; 
+		 }
+		 
+		 $cURLConnection2 = curl_init();
+		curl_setopt($cURLConnection2, CURLOPT_URL,"https://madencigozlugu.com.tr/api/uyelerServis.php?token=emre&uid=".$emre['userid']);
+		curl_setopt($cURLConnection2, CURLOPT_RETURNTRANSFER, true);
+		$response2 = curl_exec($cURLConnection2);
+		curl_close($cURLConnection2);
+		$decoded_json2 = json_decode($response2,true);
+		$data2 = $decoded_json2['Uyeler'];
+		
+		foreach($data2 as $emre2) 
+		{
+		$isim= $emre2["uisim"];
+		
+		$cURLConnection3 = curl_init();
+		curl_setopt($cURLConnection3, CURLOPT_URL,"https://madencigozlugu.com.tr/api/sirketlerServis.php?token=emre&sid=".$emre2['usirket']);
+		curl_setopt($cURLConnection3, CURLOPT_RETURNTRANSFER, true);
+		$response3 = curl_exec($cURLConnection3);
+		curl_close($cURLConnection3);
+		$decoded_json3 = json_decode($response3,true);
+		$data3 = $decoded_json3['Sirketler'];
+		
+		foreach($data3 as $emre3) 
+		{
+		$sirket= $emre3["sisim"];
+		
+		}
+		}
+		 
+		   
+		
+			echo '<tr'. $renk . '>
+			<td> '. $sirket . ' - ' . $isim.'('.$emre['userid'].') </td>' . 
+			'<td >'. $emre['metan'] . '</td>' . 
+			'<td >'. $emre['propan'] . '</td>' . 
+			'<td >'. $emre['butan'] . '</td>' . 
+			'<td >'. $emre['co'] . '</td>' . 
+			'<td >'. $emre['temizHava'] .'</td>' . 
+			'<td>'. $emre['tarih'] .'</td>' . 
+			'</tr>';
+		
+		
+			
+		
+		 
 		}
 		 
 			  
@@ -120,7 +175,8 @@
 	 
                 </tbody>
 </table>
-   
+
+
   </div>
   
   </div>
